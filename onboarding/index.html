@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procyo — Espace Courtier</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+:root {
+  --navy:#0B1F3A; --navy2:#152d50; --blue:#1D6AE5; --blue-h:#1558c4;
+  --blue-pale:#EEF4FF; --blue-mid:#C7D9FA;
+  --green:#16A34A; --green-pale:#F0FDF4; --green-mid:#BBF7D0;
+  --orange:#EA6C00; --orange-pale:#FFF3E8;
+  --red:#DC2626; --red-pale:#FEF2F2;
+  --g50:#F8FAFC; --g100:#F1F5F9; --g200:#E2E8F0; --g300:#CBD5E1;
+  --g400:#94A3B8; --g500:#64748B; --g600:#475569; --g700:#334155; --g800:#1E293B;
+  --r:10px; --r-lg:16px; --font:'Plus Jakarta Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--g50);color:var(--g800);min-height:100vh;font-size:15px}
+.hidden{display:none!important}
+
+/* AUTH */
+#screen-auth{min-height:100vh;display:flex}
+.auth-left{width:400px;flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;justify-content:space-between;padding:48px 40px;position:relative;overflow:hidden}
+.auth-left::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:rgba(29,106,229,.12);pointer-events:none}
+.auth-left::after{content:'';position:absolute;bottom:-60px;left:-60px;width:220px;height:220px;border-radius:50%;background:rgba(232,160,32,.07);pointer-events:none}
+.auth-logo{position:relative;z-index:1}
+.auth-logo img{height:38px}
+.auth-logo .lf{font-size:24px;font-weight:700;color:white;letter-spacing:-.5px}
+.auth-pitch{position:relative;z-index:1}
+.auth-pitch h2{font-size:20px;font-weight:500;color:white;margin-bottom:12px;line-height:1.4}
+.auth-pitch p{font-size:13px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:24px}
+.auth-steps{display:flex;flex-direction:column;gap:12px}
+.auth-step{display:flex;gap:12px;align-items:flex-start}
+.step-dot{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:rgba(255,255,255,.6);flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;color:rgba(255,255,255,.5);line-height:1.5}
+.step-text strong{color:rgba(255,255,255,.8);font-weight:500}
+.auth-foot{position:relative;z-index:1;font-size:11px;color:rgba(255,255,255,.25)}
+.auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;background:white}
+.auth-card{width:100%;max-width:400px}
+.auth-tabs{display:flex;margin-bottom:32px;border-bottom:1.5px solid var(--g200)}
+.auth-tab{padding:10px 0;margin-right:24px;font-size:15px;font-weight:500;color:var(--g400);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:all .15s}
+.auth-tab.on{color:var(--navy);border-bottom-color:var(--blue)}
+.auth-form{display:none}
+.auth-form.on{display:block}
+.auth-form h3{font-size:20px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.auth-sub{font-size:14px;color:var(--g500);margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--g600);margin-bottom:5px}
+.field input{width:100%;padding:11px 14px;border:1.5px solid var(--g200);border-radius:var(--r);font-size:14px;font-family:var(--font);outline:none;transition:border-color .15s,box-shadow .15s;background:var(--g50);color:var(--g800)}
+.field input:focus{border-color:var(--blue);background:white;box-shadow:0 0 0 3px rgba(29,106,229,.1)}
+.field-hint{font-size:12px;color:var(--g400);margin-top:4px}
+.btn{width:100%;padding:12px;border-radius:var(--r);border:none;cursor:pointer;font-size:15px;font-weight:500;font-family:var(--font);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--blue);color:white}
+.btn-primary:hover{background:var(--blue-h);transform:translateY(-1px);box-shadow:0 4px 12px rgba(29,106,229,.25)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.msg-error{background:var(--red-pale);border:1px solid #fecaca;border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
+.msg-ok{background:var(--green-pale);border:1px solid var(--green-mid);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--green);margin-bottom:14px;display:none}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOPBAR */
+.topbar{background:var(--navy);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:200}
+.topbar-logo img{height:30px}
+.topbar-logo .lf{font-size:18px;font-weight:700;color:white}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-email{font-size:12px;color:rgba(255,255,255,.4);font-family:monospace}
+.topbar-btn{font-size:13px;padding:6px 14px;border-radius:7px;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.55);font-family:var(--font);transition:all .15s}
+.topbar-btn:hover{color:white;border-color:rgba(255,255,255,.3)}
+.topbar-btn.admin-btn{color:#E8A020;border-color:rgba(232,160,32,.3)}
+
+/* HOME */
+#screen-home{display:none;min-height:calc(100vh - 60px)}
+.home-wrap{max-width:860px;margin:0 auto;padding:44px 28px 80px}
+.home-head{margin-bottom:36px}
+.home-head h1{font-size:26px;font-weight:600;color:var(--navy);margin-bottom:8px}
+.home-head p{font-size:15px;color:var(--g500);line-height:1.7;max-width:560px}
+.progress-card{background:white;border:1px solid var(--g200);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:32px;display:flex;align-items:center;gap:24px}
+.pc-stat{text-align:center;min-width:60px}
+.pc-num{font-size:28px;font-weight:600;color:var(--navy);line-height:1}
+.pc-label{font-size:11px;color:var(--g400);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.pc-div{width:1px;height:40px;background:var(--g200)}
+.pc-bar-wrap{flex:1}
+.pc-bar-label{display:flex;justify-content:space-between;font-size:13px;color:var(--g500);margin-bottom:8px}
+.pc-bar{height:8px;background:var(--g100);border-radius:4px;overflow:hidden}
+.pc-fill{height:100%;background:linear-gradient(90deg,var(--blue),#5B9BF8);border-radius:4px;transition:width .6s ease}
+
+.mod-list{display:flex;flex-direction:column;gap:14px}
+.mod-card{background:white;border-radius:var(--r-lg);border:1.5px solid var(--g200);padding:24px 26px;cursor:pointer;transition:all .2s;display:grid;grid-template-columns:56px 1fr auto;gap:18px;align-items:center}
+.mod-card:hover:not(.locked){border-color:var(--blue-mid);box-shadow:0 4px 18px rgba(29,106,229,.08);transform:translateX(4px)}
+.mod-card.locked{cursor:default;opacity:.5}
+.mod-card.completed{border-color:var(--green-mid);background:var(--green-pale)}
+.mod-card.active-card{border-color:var(--blue-mid)}
+.mod-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.mod-icon.locked{background:var(--g100)}
+.mod-icon.active-card{background:var(--blue-pale)}
+.mod-icon.completed{background:var(--green-pale)}
+.mod-body{}
+.mod-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.mod-num{font-size:11px;font-weight:600;color:var(--g400);letter-spacing:.08em;text-transform:uppercase}
+.mod-badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px}
+.mb-locked{background:var(--g100);color:var(--g400)}
+.mb-active{background:var(--orange-pale);color:var(--orange)}
+.mb-done{background:var(--green-pale);color:var(--green)}
+.bdot{width:6px;height:6px;border-radius:50%}
+.mb-active .bdot{background:var(--orange);animation:pulse 1.5s infinite}
+.mb-done .bdot{background:var(--green)}
+.mb-locked .bdot{background:var(--g300)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.mod-title{font-size:17px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.mod-desc{font-size:13px;color:var(--g500);line-height:1.5}
+.mod-prog{min-width:120px;text-align:right}
+.prog-bar{height:5px;background:var(--g100);border-radius:3px;overflow:hidden;margin-bottom:5px}
+.prog-fill{height:100%;border-radius:3px;background:var(--blue);transition:width .4s}
+.prog-fill.done-fill{background:var(--green)}
+.prog-txt{font-size:12px;color:var(--g400)}
+.lock-icon{font-size:20px;color:var(--g300)}
+
+/* QUESTION VIEW */
+#screen-questions{display:none;min-height:calc(100vh - 60px)}
+.q-wrap{max-width:800px;margin:0 auto;padding:32px 28px 100px}
+.back-btn{display:inline-flex;align-items:center;gap:7px;color:var(--blue);font-size:14px;background:none;border:none;cursor:pointer;padding:0;margin-bottom:24px;font-weight:500;font-family:var(--font)}
+.back-btn:hover{color:var(--navy)}
+.q-head{margin-bottom:28px}
+.q-badge{display:inline-block;font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-pale);padding:4px 12px;border-radius:20px;margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase}
+.q-title{font-size:24px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.q-subtitle{font-size:14px;color:var(--g500);line-height:1.7}
+.q-prog-card{background:white;border:1px solid var(--g200);border-radius:var(--r);padding:14px 18px;margin-bottom:24px}
+.q-prog-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+.q-prog-top span:first-child{font-weight:500;color:var(--g700)}
+.q-prog-top span:last-child{color:var(--blue);font-weight:500}
+.notif-bar{background:var(--orange-pale);border:1px solid #fed7aa;border-radius:var(--r);padding:12px 16px;margin-bottom:20px;display:flex;gap:10px;font-size:13px;color:#9a3412;line-height:1.5}
+.done-bar{background:var(--green-pale);border:1.5px solid var(--green-mid);border-radius:var(--r-lg);padding:20px;text-align:center;margin-bottom:20px}
+.done-bar h3{font-size:17px;font-weight:600;color:#065f46;margin-bottom:4px}
+.done-bar p{font-size:13px;color:#047857}
+
+/* SECTIONS */
+.sec-block{background:white;border-radius:var(--r-lg);border:1px solid var(--g200);margin-bottom:14px;overflow:hidden}
+.sec-head{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background .12s;user-select:none}
+.sec-head:hover{background:var(--g50)}
+.sec-head-l{display:flex;align-items:center;gap:12px}
+.sec-letter{width:32px;height:32px;border-radius:8px;background:var(--blue-pale);color:var(--blue);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-name{font-size:14px;font-weight:600;color:var(--g800)}
+.sec-head-r{display:flex;align-items:center;gap:10px}
+.sec-pt{font-size:12px;color:var(--g400);white-space:nowrap}
+.sec-mini{width:56px;height:4px;background:var(--g100);border-radius:2px;overflow:hidden}
+.sec-mini-f{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+.sec-mini-f.full{background:var(--green)}
+.sec-chev{color:var(--g400);font-size:16px;transition:transform .2s}
+.sec-chev.open{transform:rotate(180deg)}
+.sec-body{display:none;padding:0 20px 16px;border-top:1px solid var(--g100)}
+.sec-body.open{display:block}
+
+/* QUESTIONS */
+.q-item{padding:16px 0;border-bottom:1px solid var(--g100)}
+.q-item:last-child{border-bottom:none}
+.q-lbl{font-size:14px;font-weight:500;color:var(--g700);margin-bottom:9px;line-height:1.5}
+.q-lbl .qn{color:var(--g400);font-weight:400;margin-right:5px}
+.q-input{width:100%;padding:9px 13px;border:1.5px solid var(--g200);border-radius:8px;font-size:14px;font-family:var(--font);outline:none;transition:border-color .15s;resize:vertical;color:var(--g800)}
+.q-input:focus{border-color:var(--blue)}
+.q-input.ans{border-color:var(--green);background:var(--green-pale)}
+.radios{display:flex;flex-wrap:wrap;gap:7px}
+.rbtn{padding:7px 15px;border:1.5px solid var(--g200);border-radius:20px;font-size:13px;cursor:pointer;transition:all .15s;color:var(--g600);font-family:var(--font)}
+.rbtn:hover{border-color:var(--blue-mid);color:var(--blue)}
+.rbtn.sel{background:var(--blue);border-color:var(--blue);color:white}
+.checks{display:flex;flex-direction:column;gap:7px}
+.citem{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:7px;border:1.5px solid var(--g200);cursor:pointer;font-size:13px;color:var(--g700);transition:all .15s;user-select:none}
+.citem:hover{border-color:var(--blue-mid);background:var(--blue-pale)}
+.citem.chk{border-color:var(--blue);background:var(--blue-pale);color:var(--navy)}
+.cbox{width:17px;height:17px;border:1.5px solid var(--g300);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.citem.chk .cbox{background:var(--blue);border-color:var(--blue)}
+.cbox svg{display:none}
+.citem.chk .cbox svg{display:block}
+.saved-ind{font-size:11px;color:var(--green);margin-top:4px;opacity:0;transition:opacity .3s;height:0}
+.saved-ind.show{opacity:1}
+
+/* STICKY */
+.sticky-bar{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--g200);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -4px 12px rgba(0,0,0,.05);z-index:100}
+.save-st{font-size:13px;color:var(--g400)}
+.save-st.ok{color:var(--green)}
+.btn-save{padding:10px 24px;background:var(--blue);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);transition:background .15s}
+.btn-save:hover{background:var(--navy)}
+
+/* ADMIN */
+#screen-admin{display:none;min-height:calc(100vh - 60px)}
+.admin-wrap{max-width:900px;margin:0 auto;padding:36px 28px 80px}
+.admin-title{font-size:22px;font-weight:600;color:var(--navy);margin-bottom:24px}
+.broker-card{background:white;border-radius:var(--r-lg);border:1px solid var(--g200);padding:20px 24px;margin-bottom:14px}
+.broker-card h3{font-size:16px;font-weight:600;margin-bottom:3px}
+.broker-meta{font-size:13px;color:var(--g400);margin-bottom:14px;font-family:monospace}
+.mod-pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.mpill{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px}
+.mpill.locked{background:var(--g100);color:var(--g400)}
+.mpill.active{background:var(--orange-pale);color:var(--orange)}
+.mpill.completed{background:var(--green-pale);color:var(--green)}
+.unlock-btn{font-size:12px;padding:5px 12px;border:1px solid var(--blue-mid);color:var(--blue);background:none;border-radius:6px;cursor:pointer;font-family:var(--font);transition:all .15s}
+.unlock-btn:hover{background:var(--blue);color:white}
+.broker-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+@media(max-width:640px){
+  .auth-left{display:none}
+  .home-wrap,.q-wrap,.admin-wrap{padding:20px 16px 80px}
+  .topbar{padding:0 16px}
+  .mod-card{grid-template-columns:44px 1fr}
+  .mod-prog{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="screen-auth">
+  <div class="auth-left">
+    <div class="auth-logo">
+      <img src="data:image/avif;base64,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" alt="Procyo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span class="lf" style="display:none">PROCYO</span>
+    </div>
+    <div class="auth-pitch">
+      <h2>Configurez votre agent IA Inboxia en quelques étapes</h2>
+      <p>Ce questionnaire nous permet de personnaliser votre environnement Procyo. Complétez à votre rythme — vos réponses sont sauvegardées automatiquement.</p>
+      <div class="auth-steps">
+        <div class="auth-step"><div class="step-dot">1</div><div class="step-text"><strong>Module 1</strong> — Identité, équipe, compagnies et paramètres de base</div></div>
+        <div class="auth-step"><div class="step-dot">2</div><div class="step-text"><strong>Module 2</strong> — Personnalisation de l'agent IA Inboxia</div></div>
+        <div class="auth-step"><div class="step-dot">3</div><div class="step-text"><strong>Module 3</strong> — Scénarios avancés, BRIO et frontières IA</div></div>
+      </div>
+    </div>
+    <div class="auth-foot">© 2025 Procyo — Tous droits réservés</div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab on" onclick="switchTab('login')">Se connecter</div>
+        <div class="auth-tab" onclick="switchTab('register')">Créer un compte</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-form on" id="form-login">
+        <h3>Bon retour 👋</h3>
+        <p class="auth-sub">Accédez à votre questionnaire d'onboarding</p>
+        <div class="msg-error" id="login-err"></div>
+        <div class="field"><label>Adresse email</label><input type="email" id="login-email" placeholder="vous@cabinet.be" autocomplete="email"></div>
+        <div class="field"><label>Mot de passe</label><input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password"></div>
+        <button class="btn btn-primary" id="btn-login" onclick="doLogin()">Se connecter</button>
+        <p style="margin-top:16px;font-size:13px;color:var(--g400);text-align:center">Pas encore de compte ? <a href="#" onclick="switchTab('register');return false" style="color:var(--blue)">Créer un accès</a></p>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-form" id="form-register">
+        <h3>Créer votre accès</h3>
+        <p class="auth-sub">Votre email devient votre identifiant permanent</p>
+        <div class="msg-error" id="reg-err"></div>
+        <div class="msg-ok" id="reg-ok"></div>
+        <div class="field"><label>Adresse email professionnelle</label><input type="email" id="reg-email" placeholder="vous@cabinet.be" autocomplete="email"><div class="field-hint">Cette adresse sera utilisée pour les rappels de complétion</div></div>
+        <div class="field"><label>Nom de votre cabinet (optionnel)</label><input type="text" id="reg-company" placeholder="Cabinet Dupont Assurances"></div>
+        <div class="field"><label>Mot de passe</label><input type="password" id="reg-pwd" placeholder="Min. 8 caractères" autocomplete="new-password"></div>
+        <div class="field"><label>Confirmer le mot de passe</label><input type="password" id="reg-pwd2" placeholder="••••••••" autocomplete="new-password"></div>
+        <button class="btn btn-primary" id="btn-reg" onclick="doRegister()">Créer mon accès</button>
+        <p style="margin-top:16px;font-size:13px;color:var(--g400);text-align:center">Déjà un compte ? <a href="#" onclick="switchTab('login');return false" style="color:var(--blue)">Se connecter</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app" class="hidden">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <img src="data:image/avif;base64,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" alt="Procyo" style="height:30px" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span class="lf" style="display:none">PROCYO</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-email" id="tb-email"></span>
+      <button class="topbar-btn admin-btn hidden" id="btn-admin" onclick="showAdmin()">Admin</button>
+      <button class="topbar-btn" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="screen-home">
+    <div class="home-wrap">
+      <div class="home-head">
+        <h1 id="greeting">Votre espace Procyo</h1>
+        <p>Complétez chaque module à votre rythme. Vos réponses sont sauvegardées automatiquement et transmises à votre équipe Procyo.</p>
+      </div>
+      <div class="progress-card" id="prog-card">
+        <div class="pc-stat"><div class="pc-num" id="pc-ans">0</div><div class="pc-label">Répondues</div></div>
+        <div class="pc-div"></div>
+        <div class="pc-stat"><div class="pc-num" id="pc-tot">0</div><div class="pc-label">Questions</div></div>
+        <div class="pc-div"></div>
+        <div class="pc-bar-wrap">
+          <div class="pc-bar-label"><span>Progression globale</span><span id="pc-pct">0%</span></div>
+          <div class="pc-bar"><div class="pc-fill" id="pc-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="mod-list" id="mod-list"></div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div id="screen-questions">
+    <div class="q-wrap">
+      <button class="back-btn" onclick="showHome()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+        Retour au tableau de bord
+      </button>
+      <div class="q-head">
+        <div class="q-badge" id="q-badge"></div>
+        <h2 class="q-title" id="q-title"></h2>
+        <p class="q-subtitle" id="q-sub"></p>
+      </div>
+      <div class="q-prog-card">
+        <div class="q-prog-top"><span>Progression du module</span><span id="q-prog-lbl">0 / 0</span></div>
+        <div class="pc-bar"><div class="pc-fill" id="q-prog-fill" style="width:0%"></div></div>
+      </div>
+      <div id="q-notif"></div>
+      <div id="sections-wrap"></div>
+      <div style="height:80px"></div>
+      <div class="sticky-bar">
+        <span class="save-st" id="save-st">Sauvegarde automatique activée</span>
+        <button class="btn-save" onclick="saveAll()">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="screen-admin">
+    <div class="admin-wrap">
+      <button class="back-btn" onclick="showHome()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+        Retour
+      </button>
+      <h2 class="admin-title">Administration — Courtiers inscrits</h2>
+      <div id="admin-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIG — remplacer avant mise en production
+// ══════════════════════════════════════════════════════════════
+const ODOO_CONFIG = {
+  url:      'https://VOTRE_ODOO_URL',   // ex: https://procyo.odoo.com
+  db:       'VOTRE_DB_NAME',
+  username: 'API_USER@procyo.com',       // compte technique dédié
+  password: 'API_PASSWORD',              // clé API ou mot de passe
+};
+const ADMIN_EMAILS = ['admin@procyo.com']; // emails avec accès admin
+
+// ══════════════════════════════════════════════════════════════
+// QUESTIONS DATA
+// ══════════════════════════════════════════════════════════════
+const MODULES = [
+  {
+    id:'module1', title:'Mise en production',
+    desc:'Configuration de base : identité du bureau, équipe, compagnies et paramètres de communication.',
+    icon:'⚙️',
+    sections:[
+      {id:'A',name:'Identité et structure du bureau',questions:[
+        {id:'A1',type:'text',label:'Raison sociale exacte (telle qu\'au registre BCE) ?'},
+        {id:'A2',type:'text',label:'Nom commercial si différent ?'},
+        {id:'A3',type:'text',label:'Numéro BCE / TVA ?'},
+        {id:'A4',type:'text',label:'Numéro FSMA ?'},
+        {id:'A5',type:'radio',label:'Forme juridique ?',options:['SRL','SA','SPRL','Indépendant','Autre']},
+        {id:'A6',type:'text',label:'Adresse du siège social ?'},
+        {id:'A7',type:'textarea',label:'Adresses des succursales / bureaux secondaires ?'},
+        {id:'A8',type:'text',label:'Téléphone principal ?'},
+        {id:'A9',type:'text',label:'Email principal ?'},
+        {id:'A10',type:'text',label:'Site web ?'},
+        {id:'A11',type:'textarea',label:'Liste des collaborateurs (prénom, nom, fonction, email, tél) ?'},
+        {id:'A12',type:'text',label:'Gestionnaire principal par défaut ?'},
+        {id:'A13',type:'text',label:'DPO / Responsable RGPD (nom + email) ?'},
+        {id:'A14',type:'textarea',label:'Horaires d\'ouverture par jour ?'},
+        {id:'A15',type:'text',label:'Période de fermeture annuelle ?'},
+      ]},
+      {id:'B',name:'Signature et ton de communication',questions:[
+        {id:'B1',type:'textarea',label:'Signature standard à apposer en fin de mail (texte exact) ?'},
+        {id:'B2',type:'radio',label:'Vouvoiement ou tutoiement par défaut ?',options:['Vouvoiement','Tutoiement']},
+        {id:'B3',type:'radio',label:'Ton souhaité ?',options:['Sobre','Chaleureux','Technique','Formel','Familier']},
+        {id:'B4',type:'radio',label:'Niveau d\'empathie en cas de sinistre / décès ?',options:['Factuel','Nuancé','Empathique appuyé']},
+        {id:'B5',type:'text',label:'Formule de politesse préférée ?'},
+        {id:'B6',type:'radio',label:'Adresser le client par ?',options:['Son prénom','Son nom de famille','Monsieur / Madame']},
+        {id:'B7',type:'radio',label:'Langue de réponse par défaut ?',options:['FR','NL','EN','Langue du mail entrant']},
+        {id:'B8',type:'radio',label:'Mention "Réponse rédigée avec assistance IA" ?',options:['Toujours','Jamais','Au choix du gestionnaire']},
+        {id:'B9',type:'textarea',label:'Disclaimer RGPD court à inclure ? Si oui, texte exact :'},
+      ]},
+      {id:'C',name:'Périmètre métier et portefeuille',questions:[
+        {id:'C1',type:'checkbox',label:'Branches d\'assurance traitées activement :',options:['Auto (RC, Omnium, Mini-omnium)','Habitation / incendie','RC Vie privée / familiale','Hospitalisation','Soins de santé ambulatoires','Vie individuelle','Vie groupe','Protection juridique','Accidents corporels','Accidents du travail','Voyage / annulation','Décès / obsèques','RC professionnelle','Multirisques PME','Cyber-risques','Crédit / caution']},
+        {id:'C2',type:'textarea',label:'Branches que vous ne traitez jamais ?'},
+        {id:'C3',type:'radio',label:'Proportion PP / PM dans le portefeuille ?',options:['Majorité PP (>70%)','Mixte 50/50','Majorité PM (>70%)']},
+        {id:'C4',type:'checkbox',label:'Profils-types de clients :',options:['Familles / particuliers','Indépendants / professions libérales','Médecins / paramédicaux','Avocats / notaires','PME 1-50 salariés','Entreprises 50-250','Grandes entreprises','ASBL / associations','Copropriétés / syndics','Flottes auto / transporteurs']},
+        {id:'C5',type:'text',label:'Nombre approximatif de contrats actifs ?'},
+        {id:'C6',type:'text',label:'Nombre approximatif de mails entrants clients par jour ?'},
+      ]},
+      {id:'D',name:'Compagnies partenaires',questions:[
+        {id:'D1',type:'textarea',label:'Listez vos compagnies avec mandat actif (nom, branches couvertes) :'},
+        {id:'D2',type:'textarea',label:'Compagnie préférée par branche (auto, habitation, hospi, vie…) :'},
+        {id:'D3',type:'textarea',label:'Compagnies à éviter ou en cours de retrait (raison) ?'},
+        {id:'D4',type:'radio',label:'Convention RDR (auto) appliquée ?',options:['Systématiquement','Cas par cas','Pas appliquée']},
+        {id:'D5',type:'textarea',label:'Compagnies avec délégation de gestion sinistres (vous gérez en interne) ?'},
+      ]},
+      {id:'E',name:'Boîtes mail et filtres',questions:[
+        {id:'E1',type:'text',label:'Adresse email principale à surveiller par Inboxia ?'},
+        {id:'E2',type:'textarea',label:'Adresses secondaires (sinistres@, info@, contact@) à traiter ?'},
+        {id:'E3',type:'checkbox',label:'Mails à NE PAS traiter automatiquement :',options:['Mails entre collègues','Mails d\'une compagnie (B2B)','Mails de l\'Ombudsman / FSMA / APD','Mails d\'un avocat ou huissier','Mails de fournisseurs','Mails marketing / newsletters','Mails marqués "Confidentiel"']},
+        {id:'E4',type:'checkbox',label:'Catégories requérant validation humaine avant brouillon :',options:['Sinistre corporel','Décès du client','Litige / contestation','Demande de résiliation','Plainte / réclamation','Demande RGPD','Réclamation Ombudsman','Mise en demeure','Suspicion de fraude']},
+      ]},
+    ]
+  },
+  {
+    id:'module2', title:'Personnalisation de l\'agent IA',
+    desc:'Paramétrez le comportement d\'Inboxia : workflows, devis, sinistres, modifications de contrat.',
+    icon:'🤖',
+    sections:[
+      {id:'F',name:'Demandes de documentation',questions:[
+        {id:'F1',type:'radio',label:'Quand un client demande les CG d\'un produit, vous :',options:['Joignez le PDF directement','Renvoyez vers le portail compagnie','Attendez confirmation du gestionnaire']},
+        {id:'F2',type:'radio',label:'Pour les Conditions Particulières (police personnelle) :',options:['Générez depuis BRIO','Renvoyez vers le portail compagnie','Demandez au gestionnaire']},
+        {id:'F3',type:'text',label:'Sous quel délai considérez-vous normal de fournir des CP ?'},
+        {id:'F4',type:'checkbox',label:'Types d\'attestation fournis régulièrement :',options:['Attestation d\'assurance','Attestation antécédents auto','Attestation RC pro','Attestation hospitalisation pour employeur','Attestation primes payées (fiscale)','Carte verte (auto)','Attestation pour visa / voyage']},
+        {id:'F5',type:'text',label:'Délai moyen pour produire une attestation ?'},
+        {id:'F6',type:'radio',label:'L\'IA peut-elle pré-rédiger l\'attestation ?',options:['Oui, en autonomie','Non, seulement confirmer la prise en compte']},
+      ]},
+      {id:'G',name:'Devis et nouvelles souscriptions',questions:[
+        {id:'G1',type:'checkbox',label:'Pour un devis AUTO, infos obligatoires :',options:['Marque / modèle / version','Date de mise en circulation','Conducteur principal (DOB, permis depuis)','Usage (privé / pro / mixte)','Antécédents 5 ans (bonus-malus)','Formule demandée (RC / Omnium / Mini)','Date de prise d\'effet']},
+        {id:'G2',type:'checkbox',label:'Pour un devis HABITATION, infos obligatoires :',options:['Adresse complète du bien','Propriétaire / locataire','Type (maison / appartement / commerce)','Surface habitable (m²)','Année de construction','Capital contenu souhaité','Zone inondable ?','Date de prise d\'effet']},
+        {id:'G3',type:'radio',label:'L\'IA peut-elle poser les questions de tarification en autonomie ?',options:['Oui, en autonomie','Non, attend validation gestionnaire']},
+        {id:'G4',type:'radio',label:'L\'IA peut-elle proposer un tarif préliminaire ?',options:['Oui','Non']},
+        {id:'G5',type:'radio',label:'L\'IA peut-elle proposer une remise commerciale ?',options:['Oui','Non','Avec un plafond défini']},
+        {id:'G6',type:'text',label:'Validité d\'un devis par défaut (en jours) ?'},
+      ]},
+      {id:'H',name:'Modifications de contrat',questions:[
+        {id:'H1',type:'radio',label:'Changement d\'adresse — l\'IA peut patcher BRIO directement ?',options:['Oui','Non']},
+        {id:'H2',type:'radio',label:'Changement IBAN — l\'IA peut modifier directement ?',options:['Oui','Non','Sous condition (vérification téléphonique)']},
+        {id:'H3',type:'radio',label:'Changement de véhicule — l\'IA peut générer la suspension provisoire ?',options:['Oui','Non']},
+        {id:'H4',type:'radio',label:'Ajout d\'un conducteur — l\'IA peut accepter sans surprime ?',options:['Oui','Non','Cas par cas']},
+        {id:'H5',type:'radio',label:'Changement de formule (RC → Omnium) — effet ?',options:['Immédiat','À l\'échéance']},
+        {id:'H6',type:'radio',label:'Changement de formule — nécessite validation ?',options:['L\'IA gère','Validation gestionnaire requise']},
+      ]},
+      {id:'I',name:'Déclarations de sinistres',questions:[
+        {id:'I1',type:'checkbox',label:'Sinistre AUTO — pièces minimales requises :',options:['Constat européen amiable','Photos des dégâts','PV de police','Numéros de plaque des autres véhicules','Devis de réparation']},
+        {id:'I2',type:'radio',label:'Mesures conservatoires à toujours mentionner ?',options:['Oui, systématiquement','Non','Selon la situation']},
+        {id:'I3',type:'radio',label:'Délai légal de 8 jours à rappeler systématiquement ?',options:['Oui','Non']},
+        {id:'I4',type:'checkbox',label:'Sinistre HABITATION — pièces minimales requises :',options:['Description des circonstances','Photos des dégâts','Devis de réparation','PV pompiers (si incendie)','PV police (si vol)','Liste contenu volé']},
+        {id:'I5',type:'radio',label:'Sinistre CORPOREL — l\'IA peut proposer un brouillon ?',options:['Oui','Non, bloquer systématiquement']},
+        {id:'I6',type:'radio',label:'Sinistre corporel — délai d\'alerte gestionnaire ?',options:['Immédiat','Sous 1h','Sous 24h']},
+      ]},
+      {id:'J',name:'Suivi de sinistres et cycle de vie',questions:[
+        {id:'J1',type:'radio',label:'L\'IA peut lister les intervenants connus sur un dossier ?',options:['Oui','Non']},
+        {id:'J2',type:'radio',label:'L\'IA peut mentionner les montants déjà indemnisés ?',options:['Oui','Non']},
+        {id:'J3',type:'radio',label:'L\'IA peut donner une date prévisionnelle de clôture ?',options:['Oui','Non','Sur demande explicite']},
+        {id:'J4',type:'radio',label:'L\'IA peut annoncer un refus d\'indemnisation ?',options:['Oui','Non, toujours bloquer']},
+        {id:'J5',type:'radio',label:'Résiliation à l\'échéance par le client — tentative de rétention ?',options:['Systématique','Non, accusé de réception neutre','Selon le profil client']},
+        {id:'J6',type:'radio',label:'L\'IA vérifie automatiquement les dates légales de préavis ?',options:['Oui','Non']},
+      ]},
+    ]
+  },
+  {
+    id:'module3', title:'Scénarios avancés',
+    desc:'BRIO, procédures spéciales, frontières de l\'IA et paramètres de monitoring.',
+    icon:'🔬',
+    sections:[
+      {id:'K',name:'Création d\'activités BRIO',questions:[
+        {id:'K1',type:'checkbox',label:'Catégories déclenchant systématiquement une activité BRIO :',options:['Déclaration sinistre','Demande modification contrat','Demande devis','Réclamation / plainte','Demande résiliation','Demande documentation','Premier contact prospect','Mail nécessitant un suivi']},
+        {id:'K2',type:'text',label:'Type d\'activité par défaut (code BRIO ou libellé) ?'},
+        {id:'K3',type:'radio',label:'Destinataire par défaut d\'une activité ?',options:['Gestionnaire du dossier','Gestionnaire de la party','Toujours le même collaborateur']},
+        {id:'K4',type:'radio',label:'Priorité par défaut ?',options:['Haute','Normale','Basse']},
+        {id:'K5',type:'text',label:'Délai d\'échéance par défaut (en jours) ?'},
+        {id:'K6',type:'radio',label:'Activité visible dans My Broker par défaut ?',options:['Oui','Non']},
+      ]},
+      {id:'L',name:'Classement de documents BRIO',questions:[
+        {id:'L1',type:'radio',label:'Pièce jointe reçue — entité par défaut pour classement ?',options:['Party','Contract','Claimfolder','Risk object']},
+        {id:'L2',type:'textarea',label:'Qualifiers BRIO utilisés (constat, CI, attestation, devis, PV, photos…) — indiquez vos codes :'},
+        {id:'L3',type:'radio',label:'Constat reçu → ouverture sinistre automatique ?',options:['Oui','Non']},
+        {id:'L4',type:'radio',label:'Acte décès reçu → ouverture sinistre vie ?',options:['Oui','Non']},
+        {id:'L5',type:'radio',label:'Acte mariage → mise à jour party + co-preneur ?',options:['Oui','Non']},
+      ]},
+      {id:'M',name:'Procédures spéciales',questions:[
+        {id:'M1',type:'radio',label:'Sinistre corporel — alerte gestionnaire par quel canal ?',options:['Téléphone','SMS','Teams / Slack','Email urgent']},
+        {id:'M2',type:'radio',label:'Mention "recontacté sous 24h" pour sinistre corporel ?',options:['Oui, systématique','Non']},
+        {id:'M3',type:'text',label:'DPO responsable RGPD — nom et email ?'},
+        {id:'M4',type:'radio',label:'Mail Ombudsman reçu — procédure ?',options:['Transfert gérant + accusé réception 4 semaines','Réponse directe par gestionnaire','Escalade immédiate']},
+        {id:'M5',type:'radio',label:'Plainte qualité service — escalade au gérant ?',options:['Systématique','Seulement si répétée','Non']},
+        {id:'M6',type:'radio',label:'Suspicion de fraude — action immédiate ?',options:['Blocage + alerte compliance','Validation manuelle gestionnaire','Transfert gérant']},
+      ]},
+      {id:'N',name:'Frontières de l\'IA',questions:[
+        {id:'N1',type:'radio',label:'L\'IA peut envoyer un brouillon directement au client SANS validation ?',options:['Oui','Non']},
+        {id:'N2',type:'checkbox',label:'L\'IA peut modifier automatiquement dans BRIO :',options:['Email party','Téléphone party','Adresse postale party','IBAN','Date carte d\'identité','Plaque véhicule','Date d\'effet contrat']},
+        {id:'N3',type:'radio',label:'L\'IA peut créer un sinistre dans BRIO automatiquement ?',options:['Oui','Non','Sous conditions']},
+        {id:'N4',type:'radio',label:'L\'IA peut classer un document dans BRIO automatiquement ?',options:['Oui','Non']},
+        {id:'N5',type:'radio',label:'L\'IA peut créer une activité dans BRIO automatiquement ?',options:['Oui','Non']},
+        {id:'N6',type:'text',label:'Montant maximum qu\'une indemnisation que l\'IA peut mentionner sans validation (€) ?'},
+        {id:'N7',type:'radio',label:'Mail contenant "avocat / huissier / tribunal" → l\'IA bloque ?',options:['Oui, systématiquement','Non']},
+      ]},
+      {id:'O',name:'Segmentation, rappels et monitoring',questions:[
+        {id:'O1',type:'radio',label:'Avez-vous une segmentation client formalisée ?',options:['Oui (VIP, Standard, Prospect, Contentieux)','Non']},
+        {id:'O2',type:'radio',label:'Comportement spécial pour les VIP ?',options:['Validation humaine systématique','Ton particulier uniquement','Non']},
+        {id:'O3',type:'radio',label:'Avez-vous un système de relance auto (client non répondant) ?',options:['Oui','Non']},
+        {id:'O4',type:'checkbox',label:'Délais de relance souhaités :',options:['J+7','J+14','J+21','J+30']},
+        {id:'O5',type:'radio',label:'Rapport quotidien des mails traités par l\'IA ?',options:['Oui, par email','Oui, dans un dashboard','Non']},
+        {id:'O6',type:'radio',label:'Alerte en temps réel quand l\'IA bloque un mail sensible ?',options:['Oui','Non']},
+        {id:'O7',type:'radio',label:'L\'IA peut suggérer des opportunités cross-sell dans ses brouillons ?',options:['Oui','Non']},
+        {id:'O8',type:'radio',label:'L\'IA peut détecter les gaps de couverture dans un dossier client ?',options:['Oui','Non']},
+      ]},
+    ]
+  }
+];
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let currentUser = null;   // { email, company, isAdmin }
+let currentMod  = null;
+let saveTimer   = null;
+let odooUid     = null;   // Odoo session uid après authenticate
+
+// ══════════════════════════════════════════════════════════════
+// LOCAL STORAGE HELPERS
+// ══════════════════════════════════════════════════════════════
+const KEY = {
+  users:    'procyo_users',
+  session:  'procyo_session',
+  data:     (email, mid) => 'procyo_' + btoa(email) + '_' + mid,
+  statuses: (email) => 'procyo_status_' + btoa(email),
+};
+
+function getUsers()        { try { return JSON.parse(localStorage.getItem(KEY.users)||'{}'); } catch(e){return{};} }
+function saveUsers(u)      { localStorage.setItem(KEY.users, JSON.stringify(u)); }
+function getStatuses(email){ try { return JSON.parse(localStorage.getItem(KEY.statuses(email))||'{"module1":"active","module2":"locked","module3":"locked"}'); } catch(e){ return {module1:'active',module2:'locked',module3:'locked'}; } }
+function saveStatuses(email, s){ localStorage.setItem(KEY.statuses(email), JSON.stringify(s)); }
+function getData(email, mid){ try { return JSON.parse(localStorage.getItem(KEY.data(email,mid))||'{}'); } catch(e){return{};} }
+function saveData(email, mid, d){ localStorage.setItem(KEY.data(email,mid), JSON.stringify(d)); }
+
+// ══════════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════════
+function switchTab(t) {
+  document.querySelectorAll('.auth-tab').forEach((el,i) => el.classList.toggle('on', (t==='login'&&i===0)||(t==='register'&&i===1)));
+  document.getElementById('form-login').classList.toggle('on', t==='login');
+  document.getElementById('form-register').classList.toggle('on', t==='register');
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pwd   = document.getElementById('login-pwd').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  if (!email || !pwd) { showMsg(errEl,'Veuillez remplir tous les champs.'); return; }
+  const users = getUsers();
+  if (!users[email]) { showMsg(errEl,'Aucun compte trouvé pour cet email.'); return; }
+  if (users[email].pwd !== hashPwd(pwd)) { showMsg(errEl,'Mot de passe incorrect.'); return; }
+  currentUser = { email, company: users[email].company, isAdmin: ADMIN_EMAILS.includes(email) };
+  localStorage.setItem(KEY.session, JSON.stringify(currentUser));
+  enterApp();
+}
+
+function doRegister() {
+  const email   = document.getElementById('reg-email').value.trim().toLowerCase();
+  const company = document.getElementById('reg-company').value.trim();
+  const pwd     = document.getElementById('reg-pwd').value;
+  const pwd2    = document.getElementById('reg-pwd2').value;
+  const errEl   = document.getElementById('reg-err');
+  const okEl    = document.getElementById('reg-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  if (!email || !pwd) { showMsg(errEl,'Email et mot de passe requis.'); return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { showMsg(errEl,'Adresse email invalide.'); return; }
+  if (pwd.length < 8) { showMsg(errEl,'Le mot de passe doit faire au moins 8 caractères.'); return; }
+  if (pwd !== pwd2) { showMsg(errEl,'Les mots de passe ne correspondent pas.'); return; }
+  const users = getUsers();
+  if (users[email]) { showMsg(errEl,'Un compte existe déjà pour cet email.'); return; }
+  users[email] = { pwd: hashPwd(pwd), company, created: new Date().toISOString() };
+  saveUsers(users);
+  showMsg(okEl, '✓ Compte créé ! Connexion en cours…');
+  setTimeout(() => {
+    currentUser = { email, company, isAdmin: ADMIN_EMAILS.includes(email) };
+    localStorage.setItem(KEY.session, JSON.stringify(currentUser));
+    enterApp();
+  }, 1000);
+}
+
+function doLogout() {
+  currentUser = null; odooUid = null;
+  localStorage.removeItem(KEY.session);
+  document.getElementById('screen-auth').style.display = 'flex';
+  document.getElementById('screen-app').classList.add('hidden');
+  document.getElementById('login-pwd').value = '';
+}
+
+function hashPwd(p) {
+  // Simple hash côté client (le vrai hash se ferait server-side en prod)
+  let h = 0;
+  for (let i = 0; i < p.length; i++) { h = ((h << 5) - h) + p.charCodeAt(i); h |= 0; }
+  return h.toString(36) + p.length;
+}
+
+function showMsg(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+
+function checkSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY.session)||'null');
+    if (s && s.email && getUsers()[s.email]) { currentUser = s; enterApp(); return; }
+  } catch(e) {}
+}
+
+function enterApp() {
+  document.getElementById('screen-auth').style.display = 'none';
+  document.getElementById('screen-app').classList.remove('hidden');
+  document.getElementById('tb-email').textContent = currentUser.email;
+  if (currentUser.isAdmin) document.getElementById('btn-admin').classList.remove('hidden');
+  showHome();
+}
+
+// ══════════════════════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════════════════════
+function showHome() {
+  currentMod = null;
+  hideAll();
+  document.getElementById('screen-home').style.display = 'block';
+  const name = currentUser.company || currentUser.email.split('@')[0];
+  document.getElementById('greeting').textContent = 'Bonjour, ' + name + ' 👋';
+  renderModules();
+  renderGlobalProgress();
+}
+
+function renderModules() {
+  const list = document.getElementById('mod-list');
+  list.innerHTML = '';
+  const statuses = getStatuses(currentUser.email);
+  MODULES.forEach((mod, i) => {
+    const status = statuses[mod.id];
+    const { ans, tot } = getProgress(mod.id);
+    const pct = tot > 0 ? Math.round(ans/tot*100) : 0;
+    const isDone = ans >= tot && tot > 0;
+    const effectiveStatus = isDone ? 'completed' : status;
+
+    const card = document.createElement('div');
+    card.className = 'mod-card ' + (status === 'locked' ? 'locked' : effectiveStatus === 'completed' ? 'completed' : 'active-card');
+
+    let badge = '';
+    if (effectiveStatus === 'completed') badge = '<div class="mod-badge mb-done"><span class="bdot"></span>Clôturé</div>';
+    else if (status === 'active') badge = '<div class="mod-badge mb-active"><span class="bdot"></span>Accessible</div>';
+    else badge = '<div class="mod-badge mb-locked"><span class="bdot"></span>Non disponible</div>';
+
+    card.innerHTML = `
+      <div class="mod-icon ${status === 'locked' ? 'locked' : effectiveStatus === 'completed' ? 'completed' : 'active-card'}">${mod.icon}</div>
+      <div class="mod-body">
+        <div class="mod-meta">
+          <span class="mod-num">Module ${i+1}</span>
+          ${badge}
+        </div>
+        <div class="mod-title">${mod.title}</div>
+        <div class="mod-desc">${mod.desc}</div>
+      </div>
+      <div class="mod-prog">
+        ${status === 'locked'
+          ? '<div class="lock-icon">🔒</div>'
+          : `<div class="prog-bar"><div class="prog-fill${effectiveStatus==='completed'?' done-fill':''}" style="width:${pct}%"></div></div>
+             <div class="prog-txt">${ans}/${tot} questions</div>`}
+      </div>
+    `;
+    if (status !== 'locked') card.addEventListener('click', () => openModule(i));
+    list.appendChild(card);
+  });
+}
+
+function renderGlobalProgress() {
+  let totalAns = 0, totalTot = 0;
+  MODULES.forEach(mod => { const p = getProgress(mod.id); totalAns += p.ans; totalTot += p.tot; });
+  const pct = totalTot > 0 ? Math.round(totalAns/totalTot*100) : 0;
+  document.getElementById('pc-ans').textContent = totalAns;
+  document.getElementById('pc-tot').textContent = totalTot;
+  document.getElementById('pc-pct').textContent = pct + '%';
+  document.getElementById('pc-fill').style.width = pct + '%';
+}
+
+// ══════════════════════════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════════════════════════
+function getProgress(mid) {
+  const data = getData(currentUser.email, mid);
+  const mod = MODULES.find(m => m.id === mid);
+  let ans = 0, tot = 0;
+  mod.sections.forEach(s => s.questions.forEach(q => {
+    tot++;
+    const v = data[q.id];
+    if (v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)) ans++;
+  }));
+  return { ans, tot };
+}
+
+function checkAutoUnlock(mid) {
+  const { ans, tot } = getProgress(mid);
+  if (ans >= tot && tot > 0) {
+    const statuses = getStatuses(currentUser.email);
+    if (mid === 'module1' && statuses.module2 === 'locked') {
+      statuses.module1 = 'completed';
+      statuses.module2 = 'active';
+      saveStatuses(currentUser.email, statuses);
+      showUnlockToast('Module 2 débloqué ! 🎉');
+    } else if (mid === 'module2' && statuses.module3 === 'locked') {
+      statuses.module2 = 'completed';
+      statuses.module3 = 'active';
+      saveStatuses(currentUser.email, statuses);
+      showUnlockToast('Module 3 débloqué ! 🎉');
+    } else if (mid === 'module3') {
+      statuses.module3 = 'completed';
+      saveStatuses(currentUser.email, statuses);
+    }
+  }
+}
+
+function showUnlockToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:500;z-index:999;box-shadow:0 4px 16px rgba(22,163,74,.3);animation:fadeInUp .3s ease';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODULE / QUESTIONS
+// ══════════════════════════════════════════════════════════════
+function openModule(idx) {
+  currentMod = idx;
+  const mod = MODULES[idx];
+  hideAll();
+  document.getElementById('screen-questions').style.display = 'block';
+  document.getElementById('q-badge').textContent = 'Module ' + (idx+1);
+  document.getElementById('q-title').textContent = mod.title;
+  document.getElementById('q-sub').textContent = mod.desc;
+  renderSections(mod);
+  updateQProgress(mod);
+  renderNotif(idx);
+}
+
+function renderNotif(idx) {
+  const mod = MODULES[idx];
+  const { ans, tot } = getProgress(mod.id);
+  const notif = document.getElementById('q-notif');
+  if (ans >= tot && tot > 0) {
+    notif.innerHTML = '<div class="done-bar"><h3>🎉 Module complété !</h3><p>Toutes les questions ont été répondues. Votre équipe Procyo a été notifiée.</p></div>';
+  } else {
+    notif.innerHTML = '<div class="notif-bar"><span>📧</span><span><strong>Rappel quotidien actif.</strong> Tant que ce module n\'est pas clôturé, vous recevez un email de rappel chaque jour. Complétez à votre rythme, vos réponses sont sauvegardées.</span></div>';
+  }
+}
+
+function renderSections(mod) {
+  const wrap = document.getElementById('sections-wrap');
+  wrap.innerHTML = '';
+  const data = getData(currentUser.email, mod.id);
+  mod.sections.forEach(sec => {
+    const { sa, st } = secProg(sec, data);
+    const block = document.createElement('div');
+    block.className = 'sec-block';
+    block.innerHTML = `
+      <div class="sec-head" onclick="toggleSec('${sec.id}', this)">
+        <div class="sec-head-l">
+          <div class="sec-letter">${sec.id}</div>
+          <div class="sec-name">${sec.name}</div>
+        </div>
+        <div class="sec-head-r">
+          <span class="sec-pt">${sa}/${st}</span>
+          <div class="sec-mini"><div class="sec-mini-f${sa>=st?' full':''}" id="smf-${sec.id}" style="width:${st>0?Math.round(sa/st*100):0}%"></div></div>
+          <span class="sec-chev" id="schev-${sec.id}">▾</span>
+        </div>
+      </div>
+      <div class="sec-body" id="sbody-${sec.id}"></div>
+    `;
+    const body = block.querySelector('#sbody-' + sec.id);
+    sec.questions.forEach(q => body.appendChild(buildQuestion(q, data[q.id], mod.id)));
+    wrap.appendChild(block);
+  });
+}
+
+function secProg(sec, data) {
+  let sa = 0, st = sec.questions.length;
+  sec.questions.forEach(q => {
+    const v = data[q.id];
+    if (v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length===0)) sa++;
+  });
+  return { sa, st };
+}
+
+function toggleSec(id, hdr) {
+  document.getElementById('sbody-' + id).classList.toggle('open');
+  document.getElementById('schev-' + id).classList.toggle('open');
+}
+
+function buildQuestion(q, saved, mid) {
+  const el = document.createElement('div');
+  el.className = 'q-item';
+  el.id = 'qi-' + q.id;
+  const lbl = `<div class="q-lbl"><span class="qn">${q.id}.</span>${escH(q.label)}</div>`;
+  let inp = '';
+  if (q.type === 'text') {
+    inp = `<input type="text" class="q-input${saved?' ans':''}" data-qid="${q.id}" data-mid="${mid}" value="${escA(saved||'')}" placeholder="Votre réponse…">`;
+  } else if (q.type === 'textarea') {
+    inp = `<textarea class="q-input${saved?' ans':''}" data-qid="${q.id}" data-mid="${mid}" rows="3" placeholder="Votre réponse…">${escH(saved||'')}</textarea>`;
+  } else if (q.type === 'radio') {
+    inp = '<div class="radios">' + q.options.map(o =>
+      `<div class="rbtn${saved===o?' sel':''}" data-qid="${q.id}" data-mid="${mid}" data-val="${escA(o)}" onclick="pickRadio(this)">${escH(o)}</div>`
+    ).join('') + '</div>';
+  } else if (q.type === 'checkbox') {
+    const chk = Array.isArray(saved) ? saved : [];
+    inp = '<div class="checks">' + q.options.map(o =>
+      `<div class="citem${chk.includes(o)?' chk':''}" data-qid="${q.id}" data-mid="${mid}" data-val="${escA(o)}" onclick="toggleChk(this)">
+        <div class="cbox"><svg width="10" height="8" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1"/></svg></div>
+        ${escH(o)}
+      </div>`
+    ).join('') + '</div>';
+  }
+  el.innerHTML = lbl + inp + `<div class="saved-ind" id="si-${q.id}">✓ Sauvegardé</div>`;
+  setTimeout(() => {
+    el.querySelectorAll('.q-input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        inp.classList.toggle('ans', inp.value.trim() !== '');
+        debounceSave(inp.dataset.mid);
+        flashSaved(inp.dataset.qid);
+      });
+      inp.addEventListener('blur', () => saveAll());
+    });
+  }, 0);
+  return el;
+}
+
+function pickRadio(el) {
+  const { qid, mid, val } = el.dataset;
+  el.closest('.radios').querySelectorAll('.rbtn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  qSave(mid, qid, val);
+  flashSaved(qid);
+  updateQProgress(MODULES[currentMod]);
+  updateSecProg(qid);
+}
+
+function toggleChk(el) {
+  const { qid, mid } = el.dataset;
+  el.classList.toggle('chk');
+  const vals = Array.from(el.closest('.checks').querySelectorAll('.citem.chk')).map(c => c.dataset.val);
+  qSave(mid, qid, vals);
+  flashSaved(qid);
+  updateQProgress(MODULES[currentMod]);
+  updateSecProg(qid);
+}
+
+function qSave(mid, qid, val) {
+  const d = getData(currentUser.email, mid);
+  d[qid] = val;
+  saveData(currentUser.email, mid, d);
+  checkAutoUnlock(mid);
+}
+
+function updateQProgress(mod) {
+  const { ans, tot } = getProgress(mod.id);
+  const pct = tot > 0 ? Math.round(ans/tot*100) : 0;
+  document.getElementById('q-prog-lbl').textContent = ans + ' / ' + tot + ' questions';
+  document.getElementById('q-prog-fill').style.width = pct + '%';
+}
+
+function updateSecProg(qid) {
+  if (currentMod === null) return;
+  const mod = MODULES[currentMod];
+  const data = getData(currentUser.email, mod.id);
+  mod.sections.forEach(sec => {
+    if (!sec.questions.find(q => q.id === qid)) return;
+    const { sa, st } = secProg(sec, data);
+    const fill = document.getElementById('smf-' + sec.id);
+    const pt = document.querySelector('#sbody-' + sec.id)?.previousElementSibling?.querySelector('.sec-pt');
+    if (fill) { fill.style.width = st > 0 ? Math.round(sa/st*100)+'%' : '0%'; fill.classList.toggle('full', sa>=st); }
+    if (pt) pt.textContent = sa + '/' + st;
+  });
+}
+
+function flashSaved(qid) {
+  const el = document.getElementById('si-' + qid);
+  if (!el) return;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function saveAll() {
+  if (currentMod === null) return;
+  const mod = MODULES[currentMod];
+  const d = getData(currentUser.email, mod.id);
+  document.querySelectorAll('.q-input').forEach(inp => { d[inp.dataset.qid] = inp.value; });
+  saveData(currentUser.email, mod.id, d);
+  checkAutoUnlock(mod.id);
+  updateQProgress(mod);
+  renderNotif(currentMod);
+  const st = document.getElementById('save-st');
+  st.textContent = '✓ Sauvegardé';
+  st.className = 'save-st ok';
+  setTimeout(() => { st.textContent = 'Sauvegarde automatique activée'; st.className = 'save-st'; }, 2500);
+  // Envoi Odoo asynchrone (non bloquant)
+  pushToOdoo(mod.id).catch(e => console.warn('Odoo sync:', e));
+}
+
+function debounceSave(mid) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (currentMod !== null) {
+      const d = getData(currentUser.email, MODULES[currentMod].id);
+      document.querySelectorAll('.q-input').forEach(inp => { d[inp.dataset.qid] = inp.value; });
+      saveData(currentUser.email, MODULES[currentMod].id, d);
+    }
+  }, 1200);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ODOO XML-RPC INTEGRATION
+// ══════════════════════════════════════════════════════════════
+async function odooCall(endpoint, method, params) {
+  const res = await fetch(ODOO_CONFIG.url + endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { service: 'object', method, args: params } })
+  });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error.data?.message || json.error.message);
+  return json.result;
+}
+
+async function odooAuthenticate() {
+  if (odooUid) return odooUid;
+  const res = await fetch(ODOO_CONFIG.url + '/web/session/authenticate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: {
+      db: ODOO_CONFIG.db, login: ODOO_CONFIG.username, password: ODOO_CONFIG.password
+    }})
+  });
+  const json = await res.json();
+  odooUid = json.result?.uid;
+  return odooUid;
+}
+
+async function pushToOdoo(mid) {
+  try {
+    const uid = await odooAuthenticate();
+    if (!uid) return;
+    const data = getData(currentUser.email, mid);
+    const statuses = getStatuses(currentUser.email);
+
+    // Chercher si un enregistrement procyo.onboarding existe déjà pour cet email
+    const existing = await odooCall('/web/dataset/call_kw', 'execute_kw', [
+      ODOO_CONFIG.db, uid, ODOO_CONFIG.password,
+      'procyo.onboarding', 'search_read',
+      [[['broker_email', '=', currentUser.email]]],
+      { fields: ['id'], limit: 1 }
+    ]);
+
+    const vals = {
+      broker_email: currentUser.email,
+      module1_status: statuses.module1 || 'active',
+      module2_status: statuses.module2 || 'locked',
+      module3_status: statuses.module3 || 'locked',
+      ...data
+    };
+
+    if (existing && existing.length > 0) {
+      await odooCall('/web/dataset/call_kw', 'execute_kw', [
+        ODOO_CONFIG.db, uid, ODOO_CONFIG.password,
+        'procyo.onboarding', 'write',
+        [[existing[0].id], vals], {}
+      ]);
+    } else {
+      await odooCall('/web/dataset/call_kw', 'execute_kw', [
+        ODOO_CONFIG.db, uid, ODOO_CONFIG.password,
+        'procyo.onboarding', 'create',
+        [vals], {}
+      ]);
+    }
+    console.log('✓ Odoo sync OK');
+  } catch(e) {
+    console.warn('Odoo push failed (données conservées localement):', e.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════════════════════
+function showAdmin() {
+  if (!currentUser?.isAdmin) return;
+  hideAll();
+  document.getElementById('screen-admin').style.display = 'block';
+  renderAdmin();
+}
+
+function renderAdmin() {
+  const list = document.getElementById('admin-list');
+  list.innerHTML = '';
+  const users = getUsers();
+  if (Object.keys(users).length === 0) {
+    list.innerHTML = '<p style="color:var(--g400);font-size:14px">Aucun courtier inscrit pour l\'instant.</p>';
+    return;
+  }
+  Object.entries(users).forEach(([email, u]) => {
+    const statuses = getStatuses(email);
+    const card = document.createElement('div');
+    card.className = 'broker-card';
+    const pills = MODULES.map((mod, i) => {
+      const { ans, tot } = (() => {
+        const d = getData(email, mod.id);
+        let a=0, t=0;
+        mod.sections.forEach(s => s.questions.forEach(q => { t++; const v=d[q.id]; if(v!==undefined&&v!==null&&v!==''&&!(Array.isArray(v)&&v.length===0)) a++; }));
+        return { ans:a, tot:t };
+      })();
+      const st = ans >= tot && tot > 0 ? 'completed' : statuses[mod.id];
+      const lbl = st==='completed'?'Clôturé ✓' : st==='active'?'Accessible 📋':'Verrouillé 🔒';
+      return `<div class="mpill ${st}">M${i+1} — ${ans}/${tot} — ${lbl}</div>`;
+    }).join('');
+    const unlockBtns = MODULES.map((mod, i) => {
+      const st = statuses[mod.id];
+      if (st === 'locked') return `<button class="unlock-btn" onclick="adminUnlock('${email}','${mod.id}')">Débloquer Module ${i+1}</button>`;
+      return '';
+    }).join('');
+    card.innerHTML = `
+      <h3>${escH(u.company || email)}</h3>
+      <div class="broker-meta">${email}</div>
+      <div class="mod-pills">${pills}</div>
+      ${unlockBtns ? `<div class="broker-actions">${unlockBtns}</div>` : ''}
+    `;
+    list.appendChild(card);
+  });
+}
+
+function adminUnlock(email, mid) {
+  const s = getStatuses(email);
+  s[mid] = 'active';
+  saveStatuses(email, s);
+  renderAdmin();
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════
+function hideAll() {
+  ['screen-home','screen-questions','screen-admin'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+}
+function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escA(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// ══════════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('login-pwd').addEventListener('keypress', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('reg-pwd2').addEventListener('keypress', e => { if(e.key==='Enter') doRegister(); });
+  checkSession();
+});
+</script>
+</body>
+</html>
