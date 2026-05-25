@@ -737,28 +737,6 @@ function renderGlobalProgress() {
   document.getElementById('pc-fill').style.width=pct+'%';
 }
 
-// ══════════════════════════════════════════════════════════════
-// AUTO-UNLOCK
-// ══════════════════════════════════════════════════════════════
-async function checkAutoUnlock(mid) {
-  const {ans,tot} = getProgress(mid);
-  if (ans<tot||tot===0) return;
-  let changed=false;
-  if(mid==='module1'&&currentUser.module2_status==='locked'){
-    currentUser.module2_status='active'; changed=true;
-    await sbUpdate('brokers','id=eq.'+currentUser.id,{module2_status:'active',module1_completed_at:new Date().toISOString()});
-    showUnlockToast('Module 2 débloqué ! 🎉');
-  } else if(mid==='module2'&&currentUser.module3_status==='locked'){
-    currentUser.module3_status='active'; changed=true;
-    await sbUpdate('brokers','id=eq.'+currentUser.id,{module3_status:'active',module2_completed_at:new Date().toISOString()});
-    showUnlockToast('Module 3 débloqué ! 🎉');
-  } else if(mid==='module3'&&currentUser.module3_status!=='completed'){
-    currentUser.module3_status='completed'; changed=true;
-    await sbUpdate('brokers','id=eq.'+currentUser.id,{module3_status:'completed',module3_completed_at:new Date().toISOString()});
-  }
-  if(changed) renderModules();
-}
-
 function showUnlockToast(msg) {
   const t=document.createElement('div');
   t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:500;z-index:999;box-shadow:0 4px 16px rgba(22,163,74,.3)';
@@ -857,7 +835,6 @@ async function pickRadio(el) {
   await persistAnswer(qid,val);
   updateQProgress(MODULES[currentMod]);
   updateSecProg(qid);
-  await checkAutoUnlock(MODULES[currentMod].id);
 }
 
 async function toggleChk(el) {
@@ -867,7 +844,6 @@ async function toggleChk(el) {
   await persistAnswer(qid,vals);
   updateQProgress(MODULES[currentMod]);
   updateSecProg(qid);
-  await checkAutoUnlock(MODULES[currentMod].id);
 }
 
 async function persistAnswer(qid,val) {
@@ -886,8 +862,7 @@ async function saveAll() {
   st.textContent='Synchronisation…';
   try {
     await saveBatch();
-    await checkAutoUnlock(MODULES[currentMod].id);
-    updateQProgress(MODULES[currentMod]);
+      updateQProgress(MODULES[currentMod]);
     renderNotif(currentMod);
     st.textContent='✓ Synchronisé';
     st.className='save-st ok';
