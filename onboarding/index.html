@@ -585,8 +585,7 @@ const MODULES = [
         branches:['Habitation','Auto','Hospi','PJ','Assistance','Entreprise','Vie','Prior','Délégation Sinistre']},
     ]},
     {id:'M3C',name:'Bloc 3 — Filtres et catégories sensibles',questions:[
-      {id:'M3Q10',type:'checkbox',label:'Mails à ne JAMAIS traiter automatiquement',required:true,options:['Client','Assurance','Expert','Autorité de régulation','Notaire','Prestataire et fournisseur','Consultant externe','Mail interne','Réclamation','Publicité','Banque','Autre']},
-      {id:'M3Q11',type:'checkbox',label:'Catégories requérant validation humaine avant brouillon',required:true,options:['Sinistre corporel','Décès du client','Litige / contestation','Demande de résiliation','Plainte / réclamation','Demande RGPD','Réclamation Ombudsman','Mise en demeure','Suspicion de fraude']},
+      {id:'M3Q10',type:'checkbox',label:'Ne JAMAIS préparer de brouillon si le mail vient de',required:true,options:['Client','Assurance','Expert','Autorité de régulation','Notaire','Prestataire et fournisseur','Consultant externe','Mail interne','Réclamation','Publicité','Banque','Autre']},
       {id:'M3Q12',type:'text',label:'Boîte mail principale à surveiller',required:true},
       {id:'M3Q13',type:'textarea',label:'Organigramme des boîtes mails secondaires',required:true,placeholder:'sinistres@ : gestionnaire X, règles…\ninfo@ : gestionnaire Y, règles…',hint:'Pour chaque boîte : intitulé, gestionnaire référent, règles de tri.'},
     ]},
