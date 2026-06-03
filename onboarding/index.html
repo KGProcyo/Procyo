@@ -585,7 +585,7 @@ const MODULES = [
   ]},
   {id:'module2',title:'Contractualisation',desc:'Informations nécessaires à la préparation du contrat et à l\'identification des référents.',icon:'📋',sections:[
     {id:'M2A',name:'Configuration & licences',questions:[
-      {id:'M2Q1',type:'slider',label:'Combien d\'adresses email à activer dans l\'Assistant mail (Inboxia) ?',required:true,min:1,max:20,default:3},
+      {id:'M2Q1',type:'slider',label:'Combien d\'adresses email à activer dans l\'Assistant mail (Inboxia) ?',required:true,min:1,max:20,default:3,dynamicRange:'M1Q1'},
       {id:'M2Q3',type:'checkbox',label:'Quels assistants complémentaires souhaitez-vous activer ?',required:false,options:['Assistant conformité (Regulia) — KYC / AML / IDD','Assistant portefeuille (Portfolia) — analyse et tableaux de bord','Assistant commercial (Relancia) — opportunités et campagnes','Aucun pour l\'instant — uniquement l\'Assistant mail']},
     ]},
     {id:'M2B',name:'Identification juridique',questions:[
@@ -1058,13 +1058,21 @@ function buildQuestion(q,saved){
     inp+=`</div><div class="pct-total${total===100?' ok':total>0?' err':''}">Total : <strong id="ptot-${q.id}">${total}</strong> / 100 %</div>`;
   }
   else if(q.type==='slider'){
-    const val=saved!==undefined&&saved!==''?parseInt(saved):q.default;
+    // Compute dynamic range if needed
+    let sMin=q.min, sMax=q.max, sDef=q.default;
+    if(q.dynamicRange){
+      const ref=localCache[q.dynamicRange];
+      const range=sliderRangeFor(q.dynamicRange, ref);
+      if(range){sMin=range.min;sMax=range.max;sDef=range.def;}
+    }
+    let val=saved!==undefined&&saved!==''?parseInt(saved):sDef;
+    val=Math.min(sMax,Math.max(sMin,val));
     inp=`<div class="slider-wrap">
-      <input type="range" class="q-slider" data-qid="${q.id}" min="${q.min}" max="${q.max}" value="${val}">
+      <input type="range" class="q-slider" data-qid="${q.id}" min="${sMin}" max="${sMax}" value="${val}">
       <div class="slider-row">
-        <span class="slider-min">${q.min}</span>
+        <span class="slider-min">${sMin}</span>
         <span class="slider-val" id="sv-${q.id}">${val}</span>
-        <span class="slider-max">${q.max}</span>
+        <span class="slider-max">${sMax}</span>
       </div>
     </div>`;
   }
@@ -1232,6 +1240,18 @@ function buildQuestion(q,saved){
     });
   },0);
   return el;
+}
+
+function sliderRangeFor(refQid, refVal){
+  if(refQid==='M1Q1'){
+    // M1Q1 options: '1 à 3' | '4 à 10' | '11 à 30' | '31 à 50' | 'Plus de 50'
+    if(refVal==='1 à 3')      return{min:1, max:3,  def:2};
+    if(refVal==='4 à 10')     return{min:1, max:10, def:5};
+    if(refVal==='11 à 30')    return{min:4, max:30, def:10};
+    if(refVal==='31 à 50')    return{min:11,max:50, def:20};
+    if(refVal==='Plus de 50') return{min:31,max:100,def:50};
+  }
+  return null;
 }
 
 function findQ(qid){
