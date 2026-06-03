@@ -616,9 +616,10 @@ const MODULES = [
       {id:'M3Q6',type:'company-matrix',label:'Compagnies partenaires et branches',required:true,
         companies:['AG Insurance','AXA Belgium','Allianz','Baloise','DKV','Foyer','NN Insurance','Vivium','Athora','La Patronale','Baloise Luxembourg','Wealins','OneLife','Vitis Life','Lombard','AXA Wealth','Cardif','Aviza','AfiEsca','Ethias','Federale Assurance','HDI','AIG','Zurich','Chubb','Hiscox','Legal Village','ARAG','Providis','DAS','Euromex','Axa Partners','Allianz Partners','Europ Assistance','Atradius','Coface','TVM','Aedes','Avise','Ibis Insurance','Vander Haeghen','Jean Verheyen','Elitis Insurance','April'],
         branches:['Habitation','Auto','Hospi','PJ','Assistance','Entreprise','Vie','Prior','Délégation Sinistre']},
+      {id:'M3Q6b',type:'radio',label:'Convention RDR (auto) appliquée',required:false,options:['Systématiquement','Cas par cas','Pas appliquée']},
     ]},
     {id:'M3C',name:'Bloc 3 — Filtres et catégories sensibles',questions:[
-      {id:'M3Q10',type:'checkbox',label:'Ne JAMAIS préparer de brouillon si le mail vient de',required:true,options:['Client','Assurance','Expert','Autorité de régulation','Notaire','Prestataire et fournisseur','Consultant externe','Mail interne','Réclamation','Publicité','Banque','Autre']},
+      {id:'M3Q10',type:'checkbox-other',label:'Ne JAMAIS préparer de brouillon si le mail vient de',required:true,options:['Client','Assurance','Expert','Autorité de régulation','Notaire','Prestataire et fournisseur','Consultant externe','Mail interne','Réclamation','Publicité','Banque'],otherLabel:'Précisez…'},
       {id:'M3Q12',type:'text',label:'Boîte mail principale à surveiller',required:true},
       {id:'M3Q13',type:'textarea',label:'Organigramme des boîtes mails secondaires',required:true,placeholder:'sinistres@ : gestionnaire X, règles…\ninfo@ : gestionnaire Y, règles…',hint:'Pour chaque boîte : intitulé, gestionnaire référent, règles de tri.'},
     ]},
@@ -633,6 +634,7 @@ const MODULES = [
           {key:'sinistre',title:'Sinistre',text:'À la déclaration d\'un sinistre, l\'IA crée automatiquement le dossier sinistre, le rattache à l\'OR concerné, et y associe les documents et informations qu\'elle a pu détecter avec un niveau de certitude suffisant.'},
           {key:'document',title:'Document',text:'Chaque document peut être renommé selon vos règles propres. Par défaut, l\'IA applique une nomenclature claire pour faciliter la recherche. Il peut arriver qu\'un document ne soit pas correctement détecté : classement initial ambigu (document de contrat déposé dans un sinistre), nomenclature peu lisible (« scan 1 », « contrat_v_finale » alors qu\'il ne l\'est pas), etc. Si la détection vous paraît évidente et qu\'elle échoue, transmettez-nous vos règles : nous les intégrons.'},
           {key:'mail',title:'Mail',text:'Si le mail est en lien avec un sinistre, il est ajouté au sinistre concerné. Si le mail concerne une question sur un OR ou un contrat, il est rattaché à l\'OR. Si le mail ne rentre dans aucune catégorie ou pourrait relever de plusieurs catégories, il est rattaché au preneur.'},
+          {key:'autre',title:'Autre',text:''},
         ]},
     ]},
   ]},
@@ -1100,17 +1102,18 @@ function buildQuestion(q,saved){
     inp=`<div class="bm-intro">${escH(q.intro)}</div><div class="bm-list">`;
     q.behaviors.forEach(b=>{
       const st=sv[b.key]||{ok:false,custom:''};
+      const isAutre=!b.text;
       inp+=`<div class="bm-item" id="bmi-${q.id}-${b.key}">
         <div class="bm-title">${escH(b.title)}</div>
-        <div class="bm-text">${escH(b.text)}</div>
+        ${isAutre?'':`<div class="bm-text">${escH(b.text)}</div>`}
         <div class="bm-actions">
-          <div class="bm-ok${st.ok?' active':''}" data-qid="${q.id}" data-key="${b.key}" onclick="bmToggleOk(this)">
+          ${isAutre?'':`<div class="bm-ok${st.ok?' active':''}" data-qid="${q.id}" data-key="${b.key}" onclick="bmToggleOk(this)">
             <span class="bm-check">✓</span> OK — comportement par défaut
           </div>
-          <div class="bm-or${st.ok?' hidden':''}">ou</div>
-          <div class="bm-custom-wrap${st.ok?' hidden':''}">
+          <div class="bm-or${st.ok?' hidden':''}">ou</div>`}
+          <div class="bm-custom-wrap${(!isAutre&&st.ok)?' hidden':''}">
             <input type="text" class="bm-custom${st.custom?' has-val':''}" data-qid="${q.id}" data-key="${b.key}"
-              placeholder="Écrire mon comportement personnalisé…"
+              placeholder="${isAutre?'Décrivez un autre comportement à paramétrer…':'Écrire mon comportement personnalisé…'}"
               value="${escA(st.custom||'')}"
               oninput="bmInput(this)">
           </div>
