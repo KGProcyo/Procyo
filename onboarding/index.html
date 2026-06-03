@@ -1107,6 +1107,7 @@ function buildQuestion(q,saved){
       <div class="fu-count" id="fuc-${q.id}">${files.length} fichier${files.length!==1?'s':''} chargé${files.length!==1?'s':''}</div>
     </div>`;
   }
+  else if(q.type==='company-matrix'){
     // saved = { 'AG Insurance': ['Auto','Vie'], ... }
     const sv=saved&&typeof saved==='object'?saved:{};
     const branchFull=q.branches; // 9 branches
