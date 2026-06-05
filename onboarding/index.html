@@ -1591,7 +1591,8 @@ const NOTIF_FIXED = {
 
 async function sendModuleNotification(modId){
   // Check not already sent
-  const alreadySent=currentUser[modId+'_notif_sent'];
+  const modIdL=modId.toLowerCase();
+  const alreadySent=currentUser[modIdL+'_notif_sent'];
   if(alreadySent)return;
   // Build recipients
   const to=[];
@@ -1613,8 +1614,8 @@ async function sendModuleNotification(modId){
       body:JSON.stringify({to,subject,html,senderName:'Procyo',senderEmail:'noreply@procyo.be'}),
     });
     // Mark as sent in DB so we don't resend
-    await sbUpdate('brokers','id=eq.'+currentUser.id,{[modId+'_notif_sent']:true});
-    currentUser[modId+'_notif_sent']=true;
+    await sbUpdate('brokers','id=eq.'+currentUser.id,{[modIdL+'_notif_sent']:true});
+    currentUser[modIdL+'_notif_sent']=true;
   }catch(e){console.warn('Notif failed:',e);}
 }
 
@@ -1719,10 +1720,11 @@ async function showAdmin(){
 
 async function adminUnlock(brokerId,mid,btn){
   btn.disabled=true;btn.textContent='…';
+  const midL=mid.toLowerCase();
   await sbUpdate('brokers','id=eq.'+brokerId,{
     [mid+'_status']:'active',
-    [mid+'_unlocked_at']:new Date().toISOString(),
-    [mid+'_reminder_count']:0,
+    [midL+'_unlocked_at']:new Date().toISOString(),
+    [midL+'_reminder_count']:0,
   });
   btn.textContent='✓ Débloqué';btn.style.color='var(--green)';
   setTimeout(()=>showAdmin(),1000);
