@@ -1774,13 +1774,8 @@ async function sendModuleNotification(modId){
       body:JSON.stringify({to,subject,html,senderName:'Procyo',senderEmail:'noreply@procyo.be'}),
     });
     // Mark as sent in DB so we don't resend
-    const completedAt = new Date().toISOString();
-    await sbUpdate('brokers','id=eq.'+currentUser.id,{
-      [modIdL+'_notif_sent']:true,
-      ['module'+modId.replace('M','')+'_completed_at']:completedAt,
-    });
+    await sbUpdate('brokers','id=eq.'+currentUser.id,{[modIdL+'_notif_sent']:true});
     currentUser[modIdL+'_notif_sent']=true;
-    currentUser['module'+modId.replace('M','')+'_completed_at']=completedAt;
   }catch(e){console.warn('Notif failed:',e);}
 }
 
@@ -1796,7 +1791,7 @@ async function updateQProgress(mod){
     if(status==='active'){
       // Enregistrer la date de complétion (toujours, indépendamment de l'envoi mail)
       const modIdL=mod.id.toLowerCase();
-      const completedKey=modIdL.replace('m','module')+'_completed_at';
+      const modNum=mod.id.replace('M',''); const completedKey='module'+modNum+'_completed_at';
       if(!currentUser[completedKey]){
         const completedAt=new Date().toISOString();
         await sbUpdate('brokers','id=eq.'+currentUser.id,{[completedKey]:completedAt});
