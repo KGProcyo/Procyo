@@ -1784,7 +1784,7 @@ async function sendModuleNotification(modId){
   }catch(e){console.warn('Notif failed:',e);}
 }
 
-function updateQProgress(mod){
+async function updateQProgress(mod){
   const{ans,tot}=getProgress(mod.id);
   const pct=tot>0?Math.round(ans/tot*100):0;
   document.getElementById('q-prog-lbl').textContent=ans+' / '+tot+' questions';
@@ -1793,6 +1793,15 @@ function updateQProgress(mod){
   if(ans>=tot&&tot>0){
     const status=currentUser[mod.id+'_status']||'locked';
     if(status==='active'){
+      // Enregistrer la date de complétion (toujours, indépendamment de l'envoi mail)
+      const modIdL=mod.id.toLowerCase();
+      const completedKey='module'+mod.id.replace('M','')+'_completed_at';
+      if(!currentUser[completedKey]){
+        const completedAt=new Date().toISOString();
+        await sbUpdate('brokers','id=eq.'+currentUser.id,{[completedKey]:completedAt});
+        currentUser[completedKey]=completedAt;
+      }
+      // Envoyer la notification si pas encore fait
       sendModuleNotification(mod.id);
     }
   }
