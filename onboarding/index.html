@@ -879,7 +879,7 @@ async function doActivate(){
   if(pwd1 !== pwd2){ errEl.textContent='Les mots de passe ne correspondent pas.'; return; }
 
   // Hasher le mot de passe (même logique que doRegister)
-  const hash = await hashPwd(pwd1);
+  const hash = await hashPassword(pwd1);
 
   // Mettre à jour le broker
   const r = await fetch(SB_URL+'/rest/v1/brokers?id=eq.'+window._activateBrokerId, {
