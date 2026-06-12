@@ -727,7 +727,7 @@ let currentObsBrokerId = null;
 // SUPABASE
 // ══════════════════════════════════════════════════════════════
 async function sbFetch(path, method='GET', body=null) {
-  const opts = { method, headers: { 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY, 'Content-Type':'application/json', 'Prefer': method==='POST'?'return=representation':'' } };
+  const prefer = method==='POST'?'return=representation':(method==='PATCH'?'return=minimal':''); const opts = { method, headers: { 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY, 'Content-Type':'application/json', ...(prefer?{'Prefer':prefer}:{}) } };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(SB_URL+'/rest/v1/'+path, opts);
   if (!res.ok) { const e=await res.text(); throw new Error(e); }
