@@ -563,7 +563,7 @@ body{font-family:var(--font);background:var(--g50);color:var(--g800);min-height:
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
         Retour
       </button>
-      <h2 class="admin-title">Administration — Courtiers inscrits <span style="font-size:12px;font-weight:400;color:var(--g400);margin-left:8px">V1.1</span></h2>
+      <h2 class="admin-title">Administration — Courtiers inscrits <span style="font-size:12px;font-weight:400;color:var(--g400);margin-left:8px">V1.2</span></h2>
       <p class="admin-sub">Gérez les accès aux modules et ajoutez des observations M4 pour chaque courtier.</p>
       <div id="admin-list"></div>
     </div>
@@ -1865,13 +1865,18 @@ function formatDossierValue(q,val){
 async function adminUnlock(brokerId,mid,btn){
   btn.disabled=true;btn.textContent='…';
   const midL=mid.toLowerCase();
-  await sbUpdate('brokers','id=eq.'+brokerId,{
-    [mid+'_status']:'active',
-    [midL+'_unlocked_at']:new Date().toISOString(),
-    [midL+'_reminder_count']:0,
-  });
-  btn.textContent='✓ Débloqué';btn.style.color='var(--green)';
-  setTimeout(()=>showAdmin(),1000);
+  try{
+    // Requête principale : seul _status est critique
+    await sbUpdate('brokers','id=eq.'+brokerId,{[mid+'_status']:'active'});
+    // Colonnes optionnelles : on tente, sans bloquer si elles n'existent pas
+    try{await sbUpdate('brokers','id=eq.'+brokerId,{[midL+'_unlocked_at']:new Date().toISOString(),[midL+'_reminder_count']:0});}catch(e2){console.warn('Colonnes optionnelles absentes:',e2);}
+    btn.textContent='✓ Débloqué';btn.style.color='var(--green)';
+    setTimeout(()=>showAdmin(),1000);
+  }catch(e){
+    btn.disabled=false;btn.textContent='🔓 Débloquer';
+    alert('Erreur déblocage : '+e.message);
+    console.error('adminUnlock error:',e);
+  }
 }
 
 async function adminSetSales(brokerId,email){
